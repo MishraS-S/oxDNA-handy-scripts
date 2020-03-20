@@ -60,7 +60,7 @@ mxn = []
 for x in range(m):
      sub = []
      for x in range(n):
-         sub.append('A')
+         sub.append('R')
      mxn.append(sub)
 
  
