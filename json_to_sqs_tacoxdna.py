@@ -34,9 +34,10 @@ with open(sys.argv[2], "r") as seq_file:
     seq=seq_file.read()
     seq=seq.upper()
     seq=list(seq)
-    for x in seq:
-        if x.isspace():
-            raise ValueError('Sequence contains whitespace!')
+    for index,base in enumerate(seq):
+        if base.isspace():
+            raise ValueError('Sequence contains whitespace ' \
+	    +repr(str(base))+' at position '+str(index)+'!')
 
 #start sites
 vhs = int(sys.argv[3])
