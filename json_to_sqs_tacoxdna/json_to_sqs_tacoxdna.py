@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 11 22:31:31 2020
-@author: Shubham
-"""
+_author__ = "Tim Peisker"
+__copyright__ = "Copyright 2020, Dietzlab (TUM)"
+__license__ = "None"
+__maintainer__ = "Tim Peisker"
+__email__ = "tim.peisker@tum.de"
+__status__ = "Development"
 __descr__ = """
+Based on the original script from https://github.com/Mishrito/oxDNA-handy-scripts
+
 Input arguments in order - input json file, input scaffold sequence file,
 starting vhelix position and starting column position of scaffold if circular
 
 Doesn't account for loops, only skips. Sequence file should be nice. There should one continuous scaffold
+
+Note from Tim Peisker: Cadnano saves DNA origami structures as .json files. These .json files store each virtual Helix
+from Cadnano as a separate helix entry. A Cadnano virtual Helix consists of two rows with little squares (one for
+the scaffold and one for the staples). Each square as represented in the .json file has a list attribute of 4 values.
+The values are [5'vHelix neighbor, 5'column neighbor, 3'vHelix neighbor, 3'column neighbor]. If there is no connection
+in the 3' or 5' direction, the respective values will be -1.
 """
 import json
 import argparse
