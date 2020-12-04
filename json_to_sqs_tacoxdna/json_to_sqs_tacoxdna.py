@@ -57,21 +57,25 @@ def compl(base):
     return base
 
 
+def compute_start(json_path):
+    with open(Path(json_path), "r") as json_file:
+        json_input = json.load(json_file)
+    # processing json for easier access via vhelix id
+    ori = {}
+    preindex = 0
+    for helix in json_input['vstrands']:
+        ori[helix['num']] = helix
+        ori[helix['num']]['preindex'] = preindex  # associate vhelix with index
+        preindex += 1
+    for vhs in range(len(ori)):
+        for cs in range(len(ori[helix['num']]['scaf'])):
+            if ori[vhs]['scaf'][cs][0:2] == [-1, -1] and \
+                    ori[vhs]['scaf'][cs][2:4] != [-1, -1]:  # if it is a start site
+                return [vhs, cs]
+    return [-1, -1]  # TODO: test the starting position for linear scaffold
+
+
 def load_data(args):
-    def compute_start(json):
-        # processing json for easier access via vhelix id
-        ori = {}
-        preindex = 0
-        for helix in json_input['vstrands']:
-            ori[helix['num']] = helix
-            ori[helix['num']]['preindex'] = preindex  # associate vhelix with index
-            preindex += 1
-        for vhs in range(len(ori)):
-            for cs in range(len(ori[helix['num']])):
-                if ori[vhs]['scaf'][cs][0:2] == [-1, -1] and \
-                        ori[vhs]['scaf'][cs][2:4] != [-1, -1]:  # if it is a start site
-                    return vhs, cs
-        return [0,5]  # TODO: test the starting position for linear scaffold
 
     with open(Path(args.json), "r") as json_file:
         json_input = json.load(json_file)
