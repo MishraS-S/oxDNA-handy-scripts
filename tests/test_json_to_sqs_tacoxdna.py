@@ -74,6 +74,13 @@ class TestJsonToSqs(unittest.TestCase):
         expected = [list("RRRRRRRR" + "AGACTTCCGGCTTAAGCTCTGAAA" + "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"), list("RRRRRRRR" + "GGGTTCTATATCTCCAGGTAGATC"[::-1] + "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")]
         self.assertEqual(result, expected)
 
+        with open(self.sample_designs / "32bp-circ.json", "r") as j:
+            json_input = json.load(j)
+        data = [json_input, list("GGCTTAAGCTCTGAAAGGGTTCTATATCTCCA"), 0, 16]
+        result = json_to_sqs_tacoxdna.compute_output(data=data)
+        expected = [list("RRRRRRRRRRRRRRRR" + "GGCTTAAGCTCTGAAA" + "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"), list("RRRRRRRRRRRRRRRR" + "GGGTTCTATATCTCCA"[::-1] + "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")]
+        self.assertEqual(result, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
