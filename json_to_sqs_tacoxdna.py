@@ -1,23 +1,29 @@
 # -*- coding: utf-8 -*-
-_author__ = "Tim Peisker"
-__copyright__ = "Copyright 2020, Dietzlab (TUM)"
-__license__ = "None"
-__maintainer__ = "Tim Peisker"
-__email__ = "tim.peisker@tum.de"
-__status__ = "Development"
-__descr__ = """
-Based on the original script from https://github.com/Mishrito/oxDNA-handy-scripts
 
-Input arguments in order - input json file, input scaffold sequence file,
-starting vhelix position and starting column position of scaffold if circular
+__descr__ = """
+Input arguments in order:
+-input json file
+-input scaffold sequence file
+-starting vhelix position of scaffold if circular
+-starting column position of scaffold if circular
+-output_file name
 
 Doesn't account for loops, only skips. Sequence file should be nice. There should one continuous scaffold
 
-Note from Tim Peisker: Cadnano saves DNA origami structures as .json files. These .json files store each virtual Helix
-from Cadnano as a separate helix entry. A Cadnano virtual Helix consists of two rows with little squares (one for
-the scaffold and one for the staples). Each square as represented in the .json file has a list attribute of 4 values.
-The values are [5'vHelix neighbor, 5'column neighbor, 3'vHelix neighbor, 3'column neighbor]. If there is no connection
-in the 3' or 5' direction, the respective values will be -1.
+To find the vhelix and column position values of your start site:
+For linear scaffolds you don't need to do anything. The default values of -1 will tell the script to find it
+automatically. Just make sure that the beginning of your sequence file matches the 5' starting site. 
+If, however, your scaffold is circular, you need to tell the script the beginning of your sequence. To do that, 
+open the design in Cadnano and locate the little square that is your start site. For vhelix enter the id found in the
+orange circle to the very left of the corresponding row of little squares. For column enter the number of squares your
+starting position is away from the leftmost square (including empty squares), e.g. if your sequence starts at the
+leftmost square, it will be column = 0.
+"""
+
+"""
+Cadnano saves the 5' and 3' neighbors of each square in the following structure:
+[5'vHelix neighbor, 5'column neighbor, 3'vHelix neighbor, 3'column neighbor]
+If there is no connection in the 3' or 5' direction, the respective values will be -1.
 """
 import json
 import argparse
@@ -48,8 +54,8 @@ def proc_input():
                         )
     parser.add_argument("-o", "--out_name",
                         help="output file name",
-                        type= str,
-                        default= "caca.sqs"
+                        type=str,
+                        default="caca.sqs"
                         )
     args = parser.parse_args()
     return args
@@ -79,14 +85,15 @@ def compute_start(json_path):
         preindex += 1
     for vhs in range(len(ori)):
         for cs in range(len(ori[helix['num']]['scaf'])):
-            if ori[vhs]['scaf'][cs][0:2] == [-1, -1] and \
-                    ori[vhs]['scaf'][cs][2:4] != [-1, -1]:  # if it is a start site
+            has_5p_neighbor = ori[vhs]['scaf'][cs][0:2] != [-1, -1]
+            has_3p_neighbor = ori[vhs]['scaf'][cs][2:4] != [-1, -1]
+            is_start_site = not has_5p_neighbor and has_3p_neighbor
+            if is_start_site:
                 return [vhs, cs]
-    return [-1, -1]  # TODO: test the starting position for linear scaffold
+    return [-1, -1]
 
 
 def load_data(args):
-
     with open(Path(args.json), "r") as json_file:
         json_input = json.load(json_file)
 
@@ -131,13 +138,13 @@ def compute_output(data):
         mxn.append(sub)
 
     skiplist = []  # list of skip sites
-    print(ori[1]['scaf'])  # tim edit
     if cs != -1 and vhs != -1:  # if it is a start site TODO test if this works with a false starting site
         i = 0  # sequence counter
         vh = vhs  # vhelix id
         c = cs  # column id
 
-        while ori[vh]['scaf'][c][2:4] != [-1, -1] and ori[vh]['scaf'][c][2:4] != [vhs, cs]:  # if it not an end site or back to the origin
+        while ori[vh]['scaf'][c][2:4] != [-1, -1] and ori[vh]['scaf'][c][2:4] != [vhs,
+                                                                                  cs]:  # if it not an end site or back to the origin
 
             vhref = vh
             preindex = ori[vh]['preindex']
@@ -148,7 +155,7 @@ def compute_output(data):
                     mxn[preindex][c] = seq[i]  # Tim edit, changed from  compl(seq[i])
                 i += 1
             else:
-                skiplist.append([preindex, c]) #  Tim: isn't there i += 1 missing?
+                skiplist.append([preindex, c])  # Tim: isn't there i += 1 missing?
             vh = ori[vh]['scaf'][c][2]
             c = ori[vhref]['scaf'][c][3]
         # since while loop stops just before the last nucleotide
@@ -156,7 +163,7 @@ def compute_output(data):
         if vh % 2 == 1:
             mxn[preindex][c] = seq[i]
         else:
-            mxn[preindex][c] = seq[i] # Tim edit, changed from compl(seq[i])
+            mxn[preindex][c] = seq[i]  # Tim edit, changed from compl(seq[i])
     else:
         raise ValueError('Not a scaffold start site!')
 
@@ -179,13 +186,12 @@ def write_sequenceFile(name, mxn):
             i += 1
 
 
-def main(args):
+def main():
+    args = proc_input()
     data = load_data(args)
     out = compute_output(data)
     write_sequenceFile(args.out_name, out)
 
 
 if __name__ == "__main__":
-    args = proc_input()
-    print(type(args))
-    #main(args)
+    main()

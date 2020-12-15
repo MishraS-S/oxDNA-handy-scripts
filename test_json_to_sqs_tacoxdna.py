@@ -1,27 +1,13 @@
 import unittest
-import json_to_sqs_tacoxdna
 from pathlib import Path
 import argparse
 import json
+import json_to_sqs_tacoxdna
 
 
 class TestJsonToSqs(unittest.TestCase):
-    # TODO: read documentation about all the different testing possibilities
-    folder = Path(
-        "/Users/peiskert/Documents/TUM/Master-thesis/Simulations/free-form-DNA-origami/json_to_sqs_tacoxdna/")
-    seq_file = Path("1033bp-seq.txt")
 
-    sample_designs = Path("sample_designs").resolve()
-
-    def test_proc_input(self):
-        vHelix = 0
-        column = 5
-        args = argparse.Namespace(json=self.sample_designs / "48bp-lin.json",
-                                  sequence=self.sample_designs / "48bp-seq.txt", vHelix=vHelix, column=column,
-                                  out_name="caca.sqs")
-        result = json_to_sqs_tacoxdna.proc_input()  # TODO figure out how to do unittesting on input parameters
-        expected = ""
-        self.assertEqual(result, expected)
+    sample_designs = Path("tests/sample_designs").resolve()
 
     def test_compl(self):
         result = json_to_sqs_tacoxdna.compl("A")
@@ -62,7 +48,6 @@ class TestJsonToSqs(unittest.TestCase):
             seq = seq_file.read()
             seq = seq.upper()
             seq = list(seq)
-            print(seq)
         expected = [json_input, list("AGACTTCCGGCTTAAGCTCTGAAAGGGTTCTATATCTCCAGGTAGATC"), 0, 8]
         self.assertEqual(result, expected)
 
